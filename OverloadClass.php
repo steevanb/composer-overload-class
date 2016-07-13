@@ -22,12 +22,13 @@ class OverloadClass
                 $autoload['classmap'] = array();
             }
 
-            foreach ($extra[static::EXTRA_OVERLOAD_CLASS] as $className => $fileName) {
-                $autoload['classmap'][$className] = static::generateProxy(
+            foreach ($extra[static::EXTRA_OVERLOAD_CLASS] as $className => $infos) {
+                static::generateProxy(
                     $extra[static::EXTRA_OVERLOAD_CACHE_DIR],
                     $className,
-                    $fileName
+                    $infos['original-file']
                 );
+                $autoload['classmap'][$className] = $infos['overload-file'];
             }
 
             $event->getComposer()->getPackage()->setAutoload($autoload);
@@ -42,9 +43,9 @@ class OverloadClass
      */
     protected static function generateProxy($cacheDir, $fullyQualifiedClassName, $filePath)
     {
-        $php = static::assertFileContent($filePath, $fullyQualifiedClassName);
+        $php = static::getPhpForDuplicatedFile($filePath, $fullyQualifiedClassName);
         $classNameParts = array_merge(array(static::NAMESPACE_PREFIX), explode('\\', $fullyQualifiedClassName));
-        $className = array_pop($classNameParts);
+        array_pop($classNameParts);
         foreach ($classNameParts as $part) {
             $cacheDir .= DIRECTORY_SEPARATOR . $part;
             if (is_dir($cacheDir) === false) {
@@ -52,7 +53,8 @@ class OverloadClass
             }
         }
 
-        file_put_contents($cacheDir . DIRECTORY_SEPARATOR . basename($filePath), $php);
+        $overloadedFilePath = $cacheDir . DIRECTORY_SEPARATOR . basename($filePath);
+        file_put_contents($overloadedFilePath, $php);
     }
 
     /**
@@ -61,38 +63,47 @@ class OverloadClass
      * @return string
      * @throws \Exception
      */
-    protected static function assertFileContent($filePath, $fullyQualifiedClassName)
+    protected static function getPhpForDuplicatedFile($filePath, $fullyQualifiedClassName)
     {
         if (is_readable($filePath) === false) {
             throw new \Exception('File "' . $filePath . '" does not exists, or is not readable.');
         }
 
-        $php = file_get_contents($filePath);
+        $phpLines = file($filePath);
         $namespace = substr($fullyQualifiedClassName, 0, strrpos($fullyQualifiedClassName, '\\'));
-        $className = substr($fullyQualifiedClassName, strrpos($fullyQualifiedClassName, '\\') + 1);
         $nextIsNamespace = false;
         $namespaceFound = null;
-        $nextIsClass = false;
-        $classFound = [];
-        $phpNamespace = null;
-        foreach (token_get_all($php) as $token) {
+        $classesFound = [];
+        $phpCodeForNamespace = null;
+        $namespaceLine = null;
+        $uses = [];
+        $addUses = [];
+        $isGlobalUse = true;
+        $lastUseLine = null;
+        $tokens = token_get_all(implode(null, $phpLines));
+        foreach ($tokens as $index => $token) {
             if (is_array($token)) {
                 if ($token[0] === T_NAMESPACE) {
                     $nextIsNamespace = true;
+                    $namespaceLine = $token[2];
                 } elseif ($token[0] === T_CLASS) {
-                    $nextIsClass = true;
+                    $classesFound[] = static::getClassNameFromTokens($tokens, $index + 1);
+                    $isGlobalUse = false;
+                } elseif ($token[0] === T_EXTENDS) {
+                    static::addUse(static::getClassNameFromTokens($tokens, $index + 1), $namespaceFound, $uses, $addUses);
+                } elseif ($isGlobalUse && $token[0] === T_USE) {
+                    $uses[] = static::getClassNameFromTokens($tokens, $index + 1);
+                    $lastUseLine = $token[2];
                 }
+
                 if ($nextIsNamespace) {
-                    $phpNamespace .= $token[1];
+                    $phpCodeForNamespace .= $token[1];
                     if ($token[0] === T_NS_SEPARATOR || $token[0] === T_STRING) {
                         $namespaceFound .= $token[1];
                     }
-                } elseif ($nextIsClass && $token[0] === T_STRING) {
-                    $classFound[] = $token[1];
-                    $nextIsClass = false;
                 }
             } elseif ($nextIsNamespace && $token === ';') {
-                $phpNamespace .= $token;
+                $phpCodeForNamespace .= $token;
                 if ($namespaceFound !== $namespace) {
                     $message = 'Expected namespace "' . $namespace . '", found "' . $namespaceFound . '" ';
                     $message .= 'in "' . $filePath . '".';
@@ -102,6 +113,22 @@ class OverloadClass
             }
         }
 
+        static::assertOnlyRightClassFound($classesFound, $fullyQualifiedClassName, $filePath);
+        static::replaceNamespace($namespaceFound, $phpCodeForNamespace, $phpLines, $namespaceLine);
+        static::addUsesInPhpLines($addUses, $phpLines, ($lastUseLine === null ? $namespaceLine : $lastUseLine));
+
+        return implode(null, $phpLines);
+    }
+
+    /**
+     * @param array $classFound
+     * @param string $fullyQualifiedClassName
+     * @param string $filePath
+     * @throws \Exception
+     */
+    protected static function assertOnlyRightClassFound(array $classFound, $fullyQualifiedClassName, $filePath)
+    {
+        $className = substr($fullyQualifiedClassName, strrpos($fullyQualifiedClassName, '\\') + 1);
         if (count($classFound) !== 1) {
             throw new \Exception('Expected 1 class, found "' . implode(', ', $classFound) . '" in "' . $filePath . '".');
         } elseif ($classFound[0] !== $className) {
@@ -109,9 +136,96 @@ class OverloadClass
             $message .= 'in "' . $filePath . '".';
             throw new \Exception($message);
         }
+    }
 
-        $php = str_replace($phpNamespace, 'namespace ' . static::NAMESPACE_PREFIX . '\\' . $namespaceFound . ';', $php);
+    /**
+     * @param string $namespace
+     * @param string $phpCodeForNamespace
+     * @param array $phpLines
+     * @param int $namespaceLine
+     */
+    protected static function replaceNamespace($namespace, $phpCodeForNamespace, &$phpLines, $namespaceLine)
+    {
+        $phpLines[$namespaceLine - 1] = str_replace(
+            $phpCodeForNamespace,
+            'namespace ' . static::NAMESPACE_PREFIX . '\\' . $namespace . ';',
+            $phpLines[$namespaceLine - 1]
+        );
+    }
 
-        return $php;
+    /**
+     * @param array $tokens
+     * @param int $index
+     * @return string
+     * @throws \Exception
+     */
+    protected static function getClassNameFromTokens(array &$tokens, $index)
+    {
+        $return = null;
+        do {
+            if (
+                is_array($tokens[$index])
+                && (
+                    $tokens[$index][0] === T_STRING
+                    || $tokens[$index][0] === T_NS_SEPARATOR
+                )
+            ) {
+                $return .= $tokens[$index][1];
+            }
+
+            $index++;
+            $continue =
+                is_array($tokens[$index])
+                && (
+                    $tokens[$index][0] === T_STRING
+                    || $tokens[$index][0] === T_NS_SEPARATOR
+                    || $tokens[$index][0] === T_WHITESPACE
+                );
+        } while ($continue);
+
+        if ($return === null) {
+            throw new \Exception('Class not found in tokens.');
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param string $className
+     * @param string $namespace
+     * @param array $uses
+     * @param array $addUses
+     */
+    protected static function addUse($className, $namespace, array $uses, array &$addUses)
+    {
+        if (substr($className, 0, 1) !== '\\') {
+            $alreadyInUses = false;
+            foreach ($uses as $use) {
+                if (substr($use, strrpos($use, '\\') + 1) === $className) {
+                    $alreadyInUses = true;
+                }
+            }
+
+            if ($alreadyInUses === false) {
+                $addUses[] = $namespace . '\\' . $className;
+            }
+        }
+    }
+
+    /**
+     * @param array $addUses
+     * @param array $phpLines
+     * @param int $line
+     */
+    protected static function addUsesInPhpLines(array $addUses, array &$phpLines, $line)
+    {
+        $linesBefore = ($line > 0) ? array_slice($phpLines, 0, $line - 1) : [];
+        $linesAfter = array_slice($phpLines, $line);
+
+        array_walk($addUses, function(&$addUse) {
+            $addUse = 'use ' . $addUse . ';';
+        });
+
+        $phpLines = array_merge($linesBefore, $addUses, $linesAfter);
     }
 }
