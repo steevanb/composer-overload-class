@@ -12,7 +12,7 @@ Sometimes, you need to overload a class from a dependency. But you can't, cause 
 
 So, if your project use Composer autoload (like Symfony projects for example), you can use steevanb/composer-overload-class.
 
-With a simple configuration, you can specify to Composer in which file it will find a class (your file).
+With a simple configuration, you can specify to Composer in which file it will find a class (your file), instead of let him find original file with class namespace.
 Cause you can't change namespace and class name of original class, otherwise all dependencies to this namespace / class name will fail
 (use Foo\Bar, method parameter type, etc), composer-overload-class will clone Foo\Bar class content into ComposerOverloadClass\Foo namespace.
 
@@ -35,18 +35,18 @@ Example taken from steevanb/doctrine-stats, to overload Doctrine ObjectHydrator 
 # composer.json
 {
     "scripts": {
-        # add a script who generated cloned classes, when autoload is generated
+        "__comment": "add a script who generate cloned classes, when autoload is generated",
         "pre-autoload-dump": "steevanb\\ComposerOverloadClass\\OverloadClass::overload"
     }
     "extra": {
-        # path to a writable directory, where overloaded classes will be cloned, with a new namespace
+        "__comment": "path to a writable directory, where overloaded classes will be cloned, with a new namespace",
         "composer-overload-cache-dir": "var/cache",
         "composer-overload-class": {
-            # fully qualified class name you want to overload
+            "__comment": "fully qualified class name you want to overload"
             "Doctrine\\ORM\\Internal\\Hydration\\ObjectHydrator": {
-                # path to original file, who contains the class you want to overload
+                "__comment": "path to original file, who contains the class you want to overload",
                 "original-file": "vendor/doctrine/orm/lib/Doctrine/ORM/Internal/Hydration/ObjectHydrator.php",
-                # path to your file, who contains your class
+                "__comment": "path to your file, who contains your class",
                 "overload-file": "vendor/steevanb/doctrine-stats/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php"
             }
         }
