@@ -1,2 +1,98 @@
-# composer-overload-class
-Add extra to composer.json, to overload autoloaded class
+[![version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.0.0)
+[![composer](https://img.shields.io/badge/composer-%3E%3D%201.0-blue.svg)](https://getcomposer.org)
+![Total Downloads](https://poser.pugx.org/steevanb/composer-overload-class/downloads)
+[![SensionLabsInsight](https://img.shields.io/badge/SensionLabsInsight-platinum-brightgreen.svg)](https://insight.sensiolabs.com/projects/a753e540-2863-444f-a174-d743ca475566/analyses/1)
+[![Scrutinizer](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/)
+
+composer-overload-class
+-----------------------
+Allow to overload autoloaded classes, to include your files instead of supposed ones.
+
+Sometimes, you need to overload a class from a dependency. But you can't, cause you've found a nice "new Foo\Bar()" somewhere in this dependency...
+
+So, if your project use Composer autoload (like Symfony projects for example), you can use steevanb/composer-overload-class.
+
+With a simple configuration, you can specify to Composer in which file it will find a class (your file).
+Cause you can't change namespace and class name of original class, otherwise all dependencies to this namespace / class name will fail
+(use Foo\Bar, method parameter type, etc), composer-overload-class will clone Foo\Bar class content into ComposerOverloadClass\Foo namespace.
+
+Your class need to have exact same namespace as overloaded one, and you can extends ComposerOverloadClass\Foo\Bar if you need.
+
+Installation
+------------
+
+```bash
+composer require steevanb/composer-overload-class 1.0.*
+```
+
+Configuration
+-------------
+
+To overload a class, you need to configure it via your composer.json.
+
+Example taken from steevanb/doctrine-stats, to overload Doctrine ObjectHydrator :
+```json
+# composer.json
+{
+    "scripts": {
+        # add a script who generated cloned classes, when autoload is generated
+        "pre-autoload-dump": "steevanb\\ComposerOverloadClass\\OverloadClass::overload"
+    }
+    "extra": {
+        # path to a writable directory, where overloaded classes will be cloned, with a new namespace
+        "composer-overload-cache-dir": "var/cache",
+        "composer-overload-class": {
+            # fully qualified class name you want to overload
+            "Doctrine\\ORM\\Internal\\Hydration\\ObjectHydrator": {
+                # path to original file, who contains the class you want to overload
+                "original-file": "vendor/doctrine/orm/lib/Doctrine/ORM/Internal/Hydration/ObjectHydrator.php",
+                # path to your file, who contains your class
+                "overload-file": "vendor/steevanb/doctrine-stats/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php"
+            }
+        }
+    }
+}
+```
+
+When configuration is finished, you need to re-generate Composer autoload :
+```bash
+composer dumpautoload
+```
+
+That's all folks !
+
+Example with Doctrine ObjectHydrator
+------------------------------------
+
+Example taken from steevanb/doctrine-stats, to overload Doctrine ObjectHydrator, to add a timer when entities are hydrated :
+
+```php
+# src/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php
+<?php
+
+namespace Doctrine\ORM\Internal\Hydration;
+
+use Doctrine\ORM\EntityManagerInterface;
+use steevanb\DoctrineStats\Doctrine\ORM\Event\HydrationEventsTrait;
+
+# extends cloned ObjectHydrator class, i just want to change hydrateAllData() code
+class ObjectHydrator extends \ComposerOverloadClass\Doctrine\ORM\Internal\Hydration\ObjectHydrator
+{
+    use HydrationEventsTrait;
+
+    /**
+     * @return EntityManagerInterface
+     */
+    protected function getEntityManager()
+    {
+        return $this->_em;
+    }
+
+    protected function hydrateAllData()
+    {
+        $eventId = $this->dispatchPreHydrationEvent();
+        parent::hydrateAllData();
+        $this->dispatchPostHydrationEvent($eventId);
+    }
+}
+```
