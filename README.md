@@ -37,12 +37,12 @@ Example taken from steevanb/doctrine-stats, to overload Doctrine ObjectHydrator 
     "scripts": {
         "__comment": "add a script who generate cloned classes, when autoload is generated",
         "pre-autoload-dump": "steevanb\\ComposerOverloadClass\\OverloadClass::overload"
-    }
+    },
     "extra": {
         "__comment": "path to a writable directory, where overloaded classes will be cloned, with a new namespace",
         "composer-overload-cache-dir": "var/cache",
         "composer-overload-class": {
-            "__comment": "fully qualified class name you want to overload"
+            "__comment": "fully qualified class name you want to overload",
             "Doctrine\\ORM\\Internal\\Hydration\\ObjectHydrator": {
                 "__comment": "path to original file, who contains the class you want to overload",
                 "original-file": "vendor/doctrine/orm/lib/Doctrine/ORM/Internal/Hydration/ObjectHydrator.php",
