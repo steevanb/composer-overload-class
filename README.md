@@ -18,6 +18,8 @@ Cause you can't change namespace and class name of original class, otherwise all
 
 Your class need to have exact same namespace as overloaded one, and you can extends ComposerOverloadClass\Foo\Bar if you need.
 
+![schema](schema.png)
+
 Installation
 ------------
 
@@ -30,23 +32,23 @@ Configuration
 
 To overload a class, you need to configure it via your composer.json.
 
-Example taken from steevanb/doctrine-stats, to overload Doctrine ObjectHydrator :
+Example taken from [steevanb/doctrine-stats](https://github.com/steevanb/doctrine-stats), to overload Doctrine ObjectHydrator :
 ```json
 # composer.json
 {
     "scripts": {
-        "__comment": "add a script who generate cloned classes, when autoload is generated",
+        "__comment": "Add a script who generate cloned classes, when autoload is generated",
         "pre-autoload-dump": "steevanb\\ComposerOverloadClass\\OverloadClass::overload"
     },
     "extra": {
-        "__comment": "path to a writable directory, where overloaded classes will be cloned, with a new namespace",
+        "__comment": "Path to a writable directory, where overloaded classes will be cloned, with it's namespace prefixed by ComposerOverloadClass",
         "composer-overload-cache-dir": "var/cache",
         "composer-overload-class": {
-            "__comment": "fully qualified class name you want to overload",
+            "__comment": "Fully qualified class name you want to overload",
             "Doctrine\\ORM\\Internal\\Hydration\\ObjectHydrator": {
-                "__comment": "path to original file, who contains the class you want to overload",
+                "__comment": "Path to original file, who contains the class you want to overload",
                 "original-file": "vendor/doctrine/orm/lib/Doctrine/ORM/Internal/Hydration/ObjectHydrator.php",
-                "__comment": "path to your file, who contains your class",
+                "__comment": "Path to your file, who contains your class",
                 "overload-file": "vendor/steevanb/doctrine-stats/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php"
             }
         }
