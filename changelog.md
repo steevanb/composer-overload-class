@@ -1,3 +1,9 @@
+1.1.0 (2016-07-19)
+------------------
+
+- Add extra/composer-overload-cache-dir-dev to set cache dir in dev
+- Add extra/composer-overload-class-dev to define classes to overload in dev
+
 1.0.1 (2016-07-19)
 ------------------
 

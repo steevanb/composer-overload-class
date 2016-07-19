@@ -1,6 +1,6 @@
-[![version](https://img.shields.io/badge/version-1.0.1-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.0.1)
+[![version](https://img.shields.io/badge/version-1.1.0-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.1.0)
 [![composer](https://img.shields.io/badge/composer-^1.0-blue.svg)](https://getcomposer.org)
-![Lines](https://img.shields.io/badge/code lines-364-green.svg)
+![Lines](https://img.shields.io/badge/code lines-387-green.svg)
 ![Total Downloads](https://poser.pugx.org/steevanb/composer-overload-class/downloads)
 [![SensionLabsInsight](https://img.shields.io/badge/SensionLabsInsight-platinum-brightgreen.svg)](https://insight.sensiolabs.com/projects/a753e540-2863-444f-a174-d743ca475566/analyses/1)
 [![Scrutinizer](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/)
@@ -42,8 +42,11 @@ Example taken from [steevanb/doctrine-stats](https://github.com/steevanb/doctrin
         "pre-autoload-dump": "steevanb\\ComposerOverloadClass\\OverloadClass::overload"
     },
     "extra": {
-        "__comment": "Path to a writable directory, where overloaded classes will be cloned, with it's namespace prefixed by ComposerOverloadClass",
-        "composer-overload-cache-dir": "var/cache",
+        "__comment": "Path to a writable directory, where overloaded classes will be cloned, with it's namespace prefixed by ComposerOverloadClass, in prod + dev env",
+        "composer-overload-cache-dir": "var/cache/prod",
+        "__comment": "Path to a writable directory, in dev env",
+        "composer-overload-cache-dir-dev": "var/cache/dev",
+        "__comment": "Classes to overload, in prod + dev env",
         "composer-overload-class": {
             "__comment": "Fully qualified class name you want to overload",
             "Doctrine\\ORM\\Internal\\Hydration\\ObjectHydrator": {
@@ -52,7 +55,9 @@ Example taken from [steevanb/doctrine-stats](https://github.com/steevanb/doctrin
                 "__comment": "Path to your file, who contains your class",
                 "overload-file": "vendor/steevanb/doctrine-stats/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php"
             }
-        }
+        },
+        "__comment": "Classes to overload, in dev env",
+        "composer-overload-class-dev": {}
     }
 }
 ```

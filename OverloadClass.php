@@ -7,7 +7,9 @@ use Composer\Script\Event;
 class OverloadClass
 {
     const EXTRA_OVERLOAD_CACHE_DIR = 'composer-overload-cache-dir';
+    const EXTRA_OVERLOAD_CACHE_DIR_DEV = 'composer-overload-cache-dir-dev';
     const EXTRA_OVERLOAD_CLASS = 'composer-overload-class';
+    const EXTRA_OVERLOAD_CLASS_DEV = 'composer-overload-class-dev';
     const NAMESPACE_PREFIX = 'ComposerOverloadClass';
 
     /**
@@ -16,22 +18,36 @@ class OverloadClass
     public static function overload(Event $event)
     {
         $extra = $event->getComposer()->getPackage()->getExtra();
-        if (array_key_exists(static::EXTRA_OVERLOAD_CLASS, $extra)) {
-            $autoload = $event->getComposer()->getPackage()->getAutoload();
-            if (array_key_exists('classmap', $autoload) === false) {
-                $autoload['classmap'] = array();
-            }
 
-            foreach ($extra[static::EXTRA_OVERLOAD_CLASS] as $className => $infos) {
-                static::generateProxy(
-                    $extra[static::EXTRA_OVERLOAD_CACHE_DIR],
-                    $className,
-                    $infos['original-file']
-                );
-                $autoload['classmap'][$className] = $infos['overload-file'];
+        if ($event->isDevMode()) {
+            $envs = [static::EXTRA_OVERLOAD_CLASS, static::EXTRA_OVERLOAD_CLASS_DEV];
+            $cacheDir = static::EXTRA_OVERLOAD_CACHE_DIR_DEV;
+            if (array_key_exists($cacheDir, $extra) === false) {
+                $cacheDir = static::EXTRA_OVERLOAD_CACHE_DIR;
             }
+        } else {
+            $envs = [static::EXTRA_OVERLOAD_CLASS];
+            $cacheDir = static::EXTRA_OVERLOAD_CACHE_DIR;
+        }
 
-            $event->getComposer()->getPackage()->setAutoload($autoload);
+        foreach ($envs as $extraKey) {
+            if (array_key_exists($extraKey, $extra)) {
+                $autoload = $event->getComposer()->getPackage()->getAutoload();
+                if (array_key_exists('classmap', $autoload) === false) {
+                    $autoload['classmap'] = array();
+                }
+
+                foreach ($extra[$extraKey] as $className => $infos) {
+                    static::generateProxy(
+                        $extra[$cacheDir],
+                        $className,
+                        $infos['original-file']
+                    );
+                    $autoload['classmap'][$className] = $infos['overload-file'];
+                }
+
+                $event->getComposer()->getPackage()->setAutoload($autoload);
+            }
         }
     }
 
