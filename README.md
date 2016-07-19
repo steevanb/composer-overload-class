@@ -1,6 +1,6 @@
-[![version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.0.0)
+[![version](https://img.shields.io/badge/version-1.0.1-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.0.1)
 [![composer](https://img.shields.io/badge/composer-^1.0-blue.svg)](https://getcomposer.org)
-![Lines](https://img.shields.io/badge/code lines-356-green.svg)
+![Lines](https://img.shields.io/badge/code lines-364-green.svg)
 ![Total Downloads](https://poser.pugx.org/steevanb/composer-overload-class/downloads)
 [![SensionLabsInsight](https://img.shields.io/badge/SensionLabsInsight-platinum-brightgreen.svg)](https://insight.sensiolabs.com/projects/a753e540-2863-444f-a174-d743ca475566/analyses/1)
 [![Scrutinizer](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/)

@@ -86,7 +86,7 @@ class OverloadClass
                 if ($token[0] === T_NAMESPACE) {
                     $nextIsNamespace = true;
                     $namespaceLine = $token[2];
-                } elseif ($token[0] === T_CLASS) {
+                } elseif ($isGlobalUse && $token[0] === T_CLASS) {
                     $classesFound[] = static::getClassNameFromTokens($tokens, $index + 1);
                     $isGlobalUse = false;
                 } elseif ($token[0] === T_EXTENDS) {
@@ -219,11 +219,11 @@ class OverloadClass
      */
     protected static function addUsesInPhpLines(array $addUses, array &$phpLines, $line)
     {
-        $linesBefore = ($line > 0) ? array_slice($phpLines, 0, $line - 1) : [];
+        $linesBefore = ($line > 0) ? array_slice($phpLines, 0, $line) : [];
         $linesAfter = array_slice($phpLines, $line);
 
         array_walk($addUses, function(&$addUse) {
-            $addUse = 'use ' . $addUse . ';';
+            $addUse = 'use ' . $addUse . ';' . "\n";
         });
 
         $phpLines = array_merge($linesBefore, $addUses, $linesAfter);
