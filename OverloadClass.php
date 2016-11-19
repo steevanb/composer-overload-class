@@ -59,6 +59,10 @@ class OverloadClass
      */
     protected static function generateProxy($cacheDir, $fullyQualifiedClassName, $filePath)
     {
+        if (is_dir($cacheDir) === false) {
+            mkdir($cacheDir);
+        }
+        
         $php = static::getPhpForDuplicatedFile($filePath, $fullyQualifiedClassName);
         $classNameParts = array_merge(array(static::NAMESPACE_PREFIX), explode('\\', $fullyQualifiedClassName));
         array_pop($classNameParts);
