@@ -1,3 +1,10 @@
+1.1.2 (2016-12-28)
+------------------
+
+- Throw \Exception if extra/composer-overload-cache-dir is not defined in composer.json
+- Write Creating dir when composer is called with -v
+- Write Foo.php is overloaded by Bar.php when composer is called with -v
+
 1.1.1 (2016-11-19)
 ------------------
 
@@ -14,7 +21,7 @@
 
 - Fix add use to ComposerOverloadClass
 
-1.0.0 (2016-07)17)
+1.0.0 (2016-07-17)
 ------------------
 
 - Create ComposerOverloadClass

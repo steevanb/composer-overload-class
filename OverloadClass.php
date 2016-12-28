@@ -3,6 +3,7 @@
 namespace steevanb\ComposerOverloadClass;
 
 use Composer\Script\Event;
+use Composer\IO\IOInterface;
 
 class OverloadClass
 {
@@ -14,6 +15,7 @@ class OverloadClass
 
     /**
      * @param Event $event
+     * @throws \Exception
      */
     public static function overload(Event $event)
     {
@@ -21,14 +23,18 @@ class OverloadClass
 
         if ($event->isDevMode()) {
             $envs = [static::EXTRA_OVERLOAD_CLASS, static::EXTRA_OVERLOAD_CLASS_DEV];
-            $cacheDir = static::EXTRA_OVERLOAD_CACHE_DIR_DEV;
-            if (array_key_exists($cacheDir, $extra) === false) {
-                $cacheDir = static::EXTRA_OVERLOAD_CACHE_DIR;
+            $cacheDirKey = static::EXTRA_OVERLOAD_CACHE_DIR_DEV;
+            if (array_key_exists($cacheDirKey, $extra) === false) {
+                $cacheDirKey = static::EXTRA_OVERLOAD_CACHE_DIR;
             }
         } else {
             $envs = [static::EXTRA_OVERLOAD_CLASS];
-            $cacheDir = static::EXTRA_OVERLOAD_CACHE_DIR;
+            $cacheDirKey = static::EXTRA_OVERLOAD_CACHE_DIR;
         }
+        if (array_key_exists($cacheDirKey, $extra) === false) {
+            throw new \Exception('You must specify extra/' . $cacheDirKey . ' in composer.json');
+        }
+        $cacheDir = $extra[$cacheDirKey];
 
         foreach ($envs as $extraKey) {
             if (array_key_exists($extraKey, $extra)) {
@@ -39,9 +45,10 @@ class OverloadClass
 
                 foreach ($extra[$extraKey] as $className => $infos) {
                     static::generateProxy(
-                        $extra[$cacheDir],
+                        $cacheDir,
                         $className,
-                        $infos['original-file']
+                        $infos['original-file'],
+                        $event->getIO()
                     );
                     $autoload['classmap'][$className] = $infos['overload-file'];
                 }
@@ -52,29 +59,47 @@ class OverloadClass
     }
 
     /**
+     * @param string $path
+     * @param IOInterface $io
+     */
+    protected function createDirectories($path, IOInterface $io)
+    {
+        if (is_dir($path) === false) {
+            $io->write('Creating directory <info>' . $path . '</info>.', true, IOInterface::VERBOSE);
+
+            $createdPath = null;
+            foreach (explode(DIRECTORY_SEPARATOR, $path) as $directory) {
+                if (is_dir($createdPath . $directory) === false) {
+                    mkdir($createdPath . $directory);
+                }
+                $createdPath .= $directory . DIRECTORY_SEPARATOR;
+            }
+        }
+    }
+
+    /**
      * @param string $cacheDir
      * @param string $fullyQualifiedClassName
      * @param string $filePath
+     * @param IOInterface $io
      * @return string
      */
-    protected static function generateProxy($cacheDir, $fullyQualifiedClassName, $filePath)
+    protected static function generateProxy($cacheDir, $fullyQualifiedClassName, $filePath, IOInterface $io)
     {
-        if (is_dir($cacheDir) === false) {
-            mkdir($cacheDir);
-        }
-        
         $php = static::getPhpForDuplicatedFile($filePath, $fullyQualifiedClassName);
         $classNameParts = array_merge(array(static::NAMESPACE_PREFIX), explode('\\', $fullyQualifiedClassName));
         array_pop($classNameParts);
-        foreach ($classNameParts as $part) {
-            $cacheDir .= DIRECTORY_SEPARATOR . $part;
-            if (is_dir($cacheDir) === false) {
-                mkdir($cacheDir);
-            }
-        }
+        $finalCacheDir = $cacheDir . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $classNameParts);
+        static::createDirectories($finalCacheDir, $io);
 
-        $overloadedFilePath = $cacheDir . DIRECTORY_SEPARATOR . basename($filePath);
+        $overloadedFilePath = $finalCacheDir . DIRECTORY_SEPARATOR . basename($filePath);
         file_put_contents($overloadedFilePath, $php);
+
+        $io->write(
+            '<info>' . $filePath . '</info> is overloaded by <comment>' . $overloadedFilePath . '</comment>',
+            true,
+            IOInterface::VERBOSE
+        );
     }
 
     /**

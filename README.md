@@ -1,8 +1,8 @@
-[![version](https://img.shields.io/badge/version-1.1.1-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.1.1)
+[![version](https://img.shields.io/badge/version-1.1.2-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.1.2)
 [![composer](https://img.shields.io/badge/composer-^1.0-blue.svg)](https://getcomposer.org)
-![Lines](https://img.shields.io/badge/code lines-387-green.svg)
+![Lines](https://img.shields.io/badge/code lines-431-green.svg)
 ![Total Downloads](https://poser.pugx.org/steevanb/composer-overload-class/downloads)
-[![SensionLabsInsight](https://img.shields.io/badge/SensionLabsInsight-platinum-brightgreen.svg)](https://insight.sensiolabs.com/projects/a753e540-2863-444f-a174-d743ca475566/analyses/1)
+[![SensionLabsInsight](https://img.shields.io/badge/SensionLabsInsight-platinum-brightgreen.svg)](https://insight.sensiolabs.com/projects/a753e540-2863-444f-a174-d743ca475566/analyses/8)
 [![Scrutinizer](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/)
 
 composer-overload-class
@@ -21,11 +21,13 @@ Your class need to have exact same namespace as overloaded one, and you can exte
 
 ![schema](schema.png)
 
+[Changelog](changelog.md)
+
 Installation
 ------------
 
 ```bash
-composer require steevanb/composer-overload-class 1.0.*
+composer require steevanb/composer-overload-class ^1.1
 ```
 
 Configuration
@@ -65,6 +67,7 @@ Example taken from [steevanb/doctrine-stats](https://github.com/steevanb/doctrin
 When configuration is finished, you need to re-generate Composer autoload :
 ```bash
 composer dumpautoload
+composer dumpautoload -v
 ```
 
 That's all folks !
