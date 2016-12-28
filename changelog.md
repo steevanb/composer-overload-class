@@ -1,3 +1,8 @@
+1.1.3 (2016-12-28)
+------------------
+
+- Add static to OverloadClass::createDirectories()
+
 1.1.2 (2016-12-28)
 ------------------
 
