@@ -1,4 +1,4 @@
-[![version](https://img.shields.io/badge/version-1.1.2-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.1.2)
+[![version](https://img.shields.io/badge/version-1.1.3-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.1.3)
 [![composer](https://img.shields.io/badge/composer-^1.0-blue.svg)](https://getcomposer.org)
 ![Lines](https://img.shields.io/badge/code lines-431-green.svg)
 ![Total Downloads](https://poser.pugx.org/steevanb/composer-overload-class/downloads)
