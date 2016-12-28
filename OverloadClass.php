@@ -62,7 +62,7 @@ class OverloadClass
      * @param string $path
      * @param IOInterface $io
      */
-    protected function createDirectories($path, IOInterface $io)
+    protected static function createDirectories($path, IOInterface $io)
     {
         if (is_dir($path) === false) {
             $io->write('Creating directory <info>' . $path . '</info>.', true, IOInterface::VERBOSE);
