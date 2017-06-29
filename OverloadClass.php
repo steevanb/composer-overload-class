@@ -11,6 +11,7 @@ class OverloadClass
     const EXTRA_OVERLOAD_CACHE_DIR_DEV = 'composer-overload-cache-dir-dev';
     const EXTRA_OVERLOAD_CLASS = 'composer-overload-class';
     const EXTRA_OVERLOAD_CLASS_DEV = 'composer-overload-class-dev';
+    const EXTRA_OVERLOAD_DUPLICATE_ORIGINAL_FILE = 'duplicate-original-file';
     const NAMESPACE_PREFIX = 'ComposerOverloadClass';
 
     /**
@@ -44,12 +45,17 @@ class OverloadClass
                 }
 
                 foreach ($extra[$extraKey] as $className => $infos) {
-                    static::generateProxy(
-                        $cacheDir,
-                        $className,
-                        $infos['original-file'],
-                        $event->getIO()
-                    );
+                    if (
+                        array_key_exists(static::EXTRA_OVERLOAD_DUPLICATE_ORIGINAL_FILE, $infos) === false
+                        || $infos[static::EXTRA_OVERLOAD_DUPLICATE_ORIGINAL_FILE] === false
+                    ) {
+                        static::generateProxy(
+                            $cacheDir,
+                            $className,
+                            $infos['original-file'],
+                            $event->getIO()
+                        );
+                    }
                     $autoload['classmap'][$className] = $infos['overload-file'];
                 }
 

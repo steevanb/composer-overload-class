@@ -1,8 +1,8 @@
-[![version](https://img.shields.io/badge/version-1.1.3-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.1.3)
+[![version](https://img.shields.io/badge/version-1.2.0-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.2.0)
 [![composer](https://img.shields.io/badge/composer-^1.0-blue.svg)](https://getcomposer.org)
-![Lines](https://img.shields.io/badge/code%20lines-431-green.svg)
+![Lines](https://img.shields.io/badge/code%20lines-444-green.svg)
 ![Total Downloads](https://poser.pugx.org/steevanb/composer-overload-class/downloads)
-[![SensionLabsInsight](https://img.shields.io/badge/SensionLabsInsight-platinum-brightgreen.svg)](https://insight.sensiolabs.com/projects/a753e540-2863-444f-a174-d743ca475566/analyses/8)
+[![SensionLabsInsight](https://img.shields.io/badge/SensionLabsInsight-platinum-brightgreen.svg)](https://insight.sensiolabs.com/projects/a753e540-2863-444f-a174-d743ca475566/analyses/15)
 [![Scrutinizer](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/)
 
 composer-overload-class
@@ -27,7 +27,7 @@ Installation
 ------------
 
 ```bash
-composer require steevanb/composer-overload-class ^1.1
+composer require steevanb/composer-overload-class ^1.2
 ```
 
 Configuration
@@ -55,7 +55,10 @@ Example taken from [steevanb/doctrine-stats](https://github.com/steevanb/doctrin
                 "__comment": "Path to original file, who contains the class you want to overload",
                 "original-file": "vendor/doctrine/orm/lib/Doctrine/ORM/Internal/Hydration/ObjectHydrator.php",
                 "__comment": "Path to your file, who contains your class",
-                "overload-file": "vendor/steevanb/doctrine-stats/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php"
+                "overload-file": "vendor/steevanb/doctrine-stats/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php",
+                "__comment": "false (default) : duplicate original class, add ComposerOverloadClass namespace prefix, you can extend it",
+                "__comment": "true : do not duplicate original class, you need to write all code in your classe",
+                "duplicate-original-file": false
             }
         },
         "__comment": "Classes to overload, in dev env",
@@ -67,6 +70,8 @@ Example taken from [steevanb/doctrine-stats](https://github.com/steevanb/doctrin
 When configuration is finished, you need to re-generate Composer autoload :
 ```bash
 composer dumpautoload
+
+# show overrided files
 composer dumpautoload -v
 ```
 
@@ -79,7 +84,6 @@ Example taken from steevanb/doctrine-stats, to overload Doctrine ObjectHydrator,
 
 ```php
 # src/ComposerOverloadClass/Doctrine/ORM/Internal/ObjectHydrator.php
-<?php
 
 namespace Doctrine\ORM\Internal\Hydration;
 
