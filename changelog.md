@@ -1,3 +1,7 @@
+### [1.3.1](../../compare/1.3.0...1.3.1) (2017-07-12)
+
+- Add _Foo is overloaded by Bar_ message in verbose mode, when _duplicate-original-file_ is set to _false_
+
 ### [1.3.0](../../compare/1.2.0...1.3.0) (2017-07-12)
 
 - Use _files_ instead of _classmap_ Composer configuration to overload classes

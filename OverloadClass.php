@@ -86,6 +86,10 @@ class OverloadClass
                             $infos['original-file'],
                             $event->getIO()
                         );
+                    } else {
+                        $message = '<info>' . $infos['original-file'] . '</info>';
+                        $message .= ' is overloaded by <comment>' . $infos['overload-file'] . '</comment>';
+                        $event->getIO()->write($message, true, IOInterface::VERBOSE);
                     }
                     $autoload['files'][$className] = $infos['overload-file'];
                 }
