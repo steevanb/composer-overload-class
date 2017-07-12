@@ -86,12 +86,12 @@ class OverloadClass
                             $infos['original-file'],
                             $event->getIO()
                         );
-                    } else {
-                        $message = '<info>' . $infos['original-file'] . '</info>';
-                        $message .= ' is overloaded by <comment>' . $infos['overload-file'] . '</comment>';
-                        $event->getIO()->write($message, true, IOInterface::VERBOSE);
                     }
                     $autoload['files'][$className] = $infos['overload-file'];
+
+                    $message = '<info>' . $infos['original-file'] . '</info>';
+                    $message .= ' is overloaded by <comment>' . $infos['overload-file'] . '</comment>';
+                    $event->getIO()->write($message, true, IOInterface::VERBOSE);
                 }
             }
         }
@@ -154,7 +154,7 @@ class OverloadClass
         file_put_contents($overloadedFilePath, $php);
 
         $io->write(
-            '<info>' . $filePath . '</info> is overloaded by <comment>' . $overloadedFilePath . '</comment>',
+            'Generate proxy for <info>' . $fullyQualifiedClassName . '</info> in <comment>' . $overloadedFilePath . '</comment>',
             true,
             IOInterface::VERBOSE
         );

@@ -1,3 +1,8 @@
+### [1.3.2](../../compare/1.3.1...1.3.2) (2017-07-12)
+
+- Add _Generate proxy for Foo in Bar_ message in verbose mode, when _duplicate-original-file_ is not set or set to _true_
+- Fix file name in  in verbose mode
+
 ### [1.3.1](../../compare/1.3.0...1.3.1) (2017-07-12)
 
 - Add _Foo is overloaded by Bar_ message in verbose mode, when _duplicate-original-file_ is set to _false_
