@@ -20,6 +20,40 @@ class OverloadClass
      */
     public static function overload(Event $event)
     {
+        static::defineAutoloadExcludeFromClassmap($event);
+        static::defineAutoloadFiles($event);
+    }
+
+    protected static function defineAutoloadExcludeFromClassmap(Event $event)
+    {
+        $originalFiles = ($event->isDevMode())
+            ? [static::EXTRA_OVERLOAD_CLASS, static::EXTRA_OVERLOAD_CLASS_DEV]
+            : [static::EXTRA_OVERLOAD_CLASS];
+        $overloadFiles = ($event->isDevMode()) ? [] : [static::EXTRA_OVERLOAD_CLASS_DEV];
+        $autoload = static::getAutoload($event);
+        $extra = $event->getComposer()->getPackage()->getExtra();
+
+        foreach ($originalFiles as $env) {
+            if (array_key_exists($env, $extra)) {
+                foreach ($extra[$env] as $className => $infos) {
+                    $autoload['exclude-from-classmap'][] = $infos['original-file'];
+                }
+            }
+        }
+
+        foreach ($overloadFiles as $env) {
+            if (array_key_exists($env, $extra)) {
+                foreach ($extra[$env] as $className => $infos) {
+                    $autoload['exclude-from-classmap'][] = $infos['overload-file'];
+                }
+            }
+        }
+
+        $event->getComposer()->getPackage()->setAutoload($autoload);
+    }
+
+    protected static function defineAutoloadFiles(Event $event)
+    {
         $extra = $event->getComposer()->getPackage()->getExtra();
 
         if ($event->isDevMode()) {
@@ -37,13 +71,10 @@ class OverloadClass
         }
         $cacheDir = $extra[$cacheDirKey];
 
+        $autoload = static::getAutoload($event);
+
         foreach ($envs as $extraKey) {
             if (array_key_exists($extraKey, $extra)) {
-                $autoload = $event->getComposer()->getPackage()->getAutoload();
-                if (array_key_exists('classmap', $autoload) === false) {
-                    $autoload['classmap'] = array();
-                }
-
                 foreach ($extra[$extraKey] as $className => $infos) {
                     if (
                         array_key_exists(static::EXTRA_OVERLOAD_DUPLICATE_ORIGINAL_FILE, $infos) === false
@@ -56,12 +87,29 @@ class OverloadClass
                             $event->getIO()
                         );
                     }
-                    $autoload['classmap'][$className] = $infos['overload-file'];
+                    $autoload['files'][$className] = $infos['overload-file'];
                 }
-
-                $event->getComposer()->getPackage()->setAutoload($autoload);
             }
         }
+
+        $event->getComposer()->getPackage()->setAutoload($autoload);
+    }
+
+    /**
+     * @param Event $event
+     * @return array
+     */
+    protected static function getAutoload(Event $event)
+    {
+        $return = $event->getComposer()->getPackage()->getAutoload();
+        if (array_key_exists('files', $return) === false) {
+            $return['files'] = array();
+        }
+        if (array_key_exists('exclude-from-classmap', $return) === false) {
+            $return['exclude-from-classmap'] = array();
+        }
+
+        return $return;
     }
 
     /**

@@ -1,3 +1,8 @@
+### [1.3.0](../../compare/1.2.0...1.3.0) (2017-07-12)
+
+- Use _files_ instead of _classmap_ Composer configuration to overload classes
+- Add non used files into _exclude-from-classmap_ Composer configuration to fix _Ambiguous class resolution_ warning
+
 ### [1.2.0](../../compare/1.1.3...1.2.0) (2017-05-29)
 
 - Add ```duplicate-original-file``` configuration to indicate if you want to duplicate original classe or not
