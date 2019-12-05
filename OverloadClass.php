@@ -14,10 +14,6 @@ class OverloadClass
     const EXTRA_OVERLOAD_DUPLICATE_ORIGINAL_FILE = 'duplicate-original-file';
     const NAMESPACE_PREFIX = 'ComposerOverloadClass';
 
-    /**
-     * @param Event $event
-     * @throws \Exception
-     */
     public static function overload(Event $event)
     {
         static::defineAutoloadExcludeFromClassmap($event);
@@ -99,10 +95,7 @@ class OverloadClass
         $event->getComposer()->getPackage()->setAutoload($autoload);
     }
 
-    /**
-     * @param Event $event
-     * @return array
-     */
+    /** @return array */
     protected static function getAutoload(Event $event)
     {
         $return = $event->getComposer()->getPackage()->getAutoload();
@@ -116,21 +109,18 @@ class OverloadClass
         return $return;
     }
 
-    /**
-     * @param string $path
-     * @param IOInterface $io
-     */
+    /** @param string $path */
     protected static function createDirectories($path, IOInterface $io)
     {
         if (is_dir($path) === false) {
             $io->write('Creating directory <info>' . $path . '</info>.', true, IOInterface::VERBOSE);
 
             $createdPath = null;
-            foreach (explode(DIRECTORY_SEPARATOR, $path) as $directory) {
+            foreach (explode('/', $path) as $directory) {
                 if (is_dir($createdPath . $directory) === false) {
                     mkdir($createdPath . $directory);
                 }
-                $createdPath .= $directory . DIRECTORY_SEPARATOR;
+                $createdPath .= $directory . '/';
             }
         }
     }
@@ -139,7 +129,6 @@ class OverloadClass
      * @param string $cacheDir
      * @param string $fullyQualifiedClassName
      * @param string $filePath
-     * @param IOInterface $io
      * @return string
      */
     protected static function generateProxy($cacheDir, $fullyQualifiedClassName, $filePath, IOInterface $io)
@@ -147,14 +136,18 @@ class OverloadClass
         $php = static::getPhpForDuplicatedFile($filePath, $fullyQualifiedClassName);
         $classNameParts = array_merge(array(static::NAMESPACE_PREFIX), explode('\\', $fullyQualifiedClassName));
         array_pop($classNameParts);
-        $finalCacheDir = $cacheDir . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $classNameParts);
+        $finalCacheDir = $cacheDir . '/' . implode('/', $classNameParts);
         static::createDirectories($finalCacheDir, $io);
 
-        $overloadedFilePath = $finalCacheDir . DIRECTORY_SEPARATOR . basename($filePath);
+        $overloadedFilePath = $finalCacheDir . '/' . basename($filePath);
         file_put_contents($overloadedFilePath, $php);
 
         $io->write(
-            'Generate proxy for <info>' . $fullyQualifiedClassName . '</info> in <comment>' . $overloadedFilePath . '</comment>',
+            'Generate proxy for <info>'
+                . $fullyQualifiedClassName
+                . '</info> in <comment>'
+                . $overloadedFilePath
+                . '</comment>',
             true,
             IOInterface::VERBOSE
         );
@@ -164,7 +157,6 @@ class OverloadClass
      * @param string $filePath
      * @param string $fullyQualifiedClassName
      * @return string
-     * @throws \Exception
      */
     protected static function getPhpForDuplicatedFile($filePath, $fullyQualifiedClassName)
     {
@@ -224,10 +216,8 @@ class OverloadClass
     }
 
     /**
-     * @param array $classFound
      * @param string $fullyQualifiedClassName
      * @param string $filePath
-     * @throws \Exception
      */
     protected static function assertOnlyRightClassFound(array $classFound, $fullyQualifiedClassName, $filePath)
     {
@@ -257,10 +247,8 @@ class OverloadClass
     }
 
     /**
-     * @param array $tokens
      * @param int $index
      * @return string
-     * @throws \Exception
      */
     protected static function getClassNameFromTokens(array &$tokens, $index)
     {
@@ -296,8 +284,6 @@ class OverloadClass
     /**
      * @param string $className
      * @param string $namespace
-     * @param array $uses
-     * @param array $addUses
      */
     protected static function addUse($className, $namespace, array $uses, array &$addUses)
     {
@@ -315,11 +301,7 @@ class OverloadClass
         }
     }
 
-    /**
-     * @param array $addUses
-     * @param array $phpLines
-     * @param int $line
-     */
+    /** @param int $line */
     protected static function addUsesInPhpLines(array $addUses, array &$phpLines, $line)
     {
         $linesBefore = ($line > 0) ? array_slice($phpLines, 0, $line) : [];

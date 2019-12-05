@@ -1,3 +1,7 @@
+### [1.3.3](../../compare/1.3.2...1.3.3) (2019-12-05)
+
+- Replace `DIRECTORY_SEPARATOR` by `/` for Windows users
+
 ### [1.3.2](../../compare/1.3.1...1.3.2) (2017-07-12)
 
 - Add _Generate proxy for Foo in Bar_ message in verbose mode, when _duplicate-original-file_ is not set or set to _true_
