@@ -4,15 +4,11 @@
     "description": "Add extra to composer.json, to overload autoloaded class",
     "minimum-stability": "dev",
     "autoload": {
-        "psr-4": { "steevanb\\ComposerOverloadClass\\": "" }
+        "psr-4": {
+            "steevanb\\ComposerOverloadClass\\": ""
+        }
     },
     "require": {
         "php": "^5.4.0 || ^7.0"
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/steevanb/composer-overload-class.git"
-        }
-    ]
+    }
 }
