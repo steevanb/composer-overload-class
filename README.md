@@ -63,7 +63,17 @@ Example taken from [steevanb/doctrine-stats](https://github.com/steevanb/doctrin
         },
         "__comment": "Classes to overload, in dev env",
         "composer-overload-class-dev": {}
-    }
+    },
+    "autoload": {
+        "psr-4": {
+            "ComposerOverloadClass\\": "var/cache/prod/ComposerOverloadClass"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ComposerOverloadClass\\": "var/cache/dev/ComposerOverloadClass"
+        }
+    },
 }
 ```
 
