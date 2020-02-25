@@ -187,8 +187,20 @@ class OverloadClass
                 } elseif ($token[0] === T_EXTENDS) {
                     static::addUse(static::getClassNameFromTokens($tokens, $index + 1), $namespaceFound, $uses, $addUses);
                 } elseif ($isGlobalUse && $token[0] === T_USE) {
-                    $uses[] = static::getClassNameFromTokens($tokens, $index + 1);
-                    $lastUseLine = $token[2];
+                    // What is the next token which is NOT a whitespace..
+                    $walkForwardSteps = 1;
+                    $continue = true;
+                    do {
+                        $nextNonWhitespaceToken = $tokens[$index + $walkForwardSteps];
+                        if($nextNonWhitespaceToken[0] !== T_WHITESPACE){
+                            $continue = false;
+                        }
+                        $walkForwardSteps++;
+                    } while($continue);
+                    if($nextNonWhitespaceToken[0] === T_STRING ) {
+                        $uses[]      = static::getClassNameFromTokens($tokens, $index + 1);
+                        $lastUseLine = $token[2];
+                    }
                 }
 
                 if ($nextIsNamespace) {
