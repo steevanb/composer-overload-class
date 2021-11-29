@@ -2,13 +2,24 @@
     "name": "steevanb/composer-overload-class",
     "license": "MIT",
     "description": "Add extra to composer.json, to overload autoloaded class",
-    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "steevanb\\ComposerOverloadClass\\": ""
         }
     },
     "require": {
-        "php": "^5.4.0 || ^7.0"
+        "php": "^5.4.0 || ^7.0 || ^8.0"
+    },
+    "require-dev": {
+        "composer/composer": "2.1.*"
+    },
+    "scripts": {
+        "rm-composer-lock": "rm composer.lock",
+        "post-install-cmd": [
+            "@rm-composer-lock"
+        ],
+        "post-update-cmd": [
+            "@rm-composer-lock"
+        ]
     }
 }
