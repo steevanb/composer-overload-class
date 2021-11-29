@@ -1,8 +1,7 @@
-[![version](https://img.shields.io/badge/version-1.3.3-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.3.3)
-[![composer](https://img.shields.io/badge/composer-^1.0-blue.svg)](https://getcomposer.org)
+[![version](https://img.shields.io/badge/version-1.4.0-green.svg)](https://github.com/steevanb/composer-overload-class/tree/1.4.0)
+[![composer](https://img.shields.io/badge/composer-^1.0||^2.0-blue.svg)](https://getcomposer.org)
 ![Lines](https://img.shields.io/badge/code%20lines-508-green.svg)
 ![Total Downloads](https://poser.pugx.org/steevanb/composer-overload-class/downloads)
-[![Scrutinizer](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/steevanb/composer-overload-class/)
 
 composer-overload-class
 -----------------------
@@ -27,7 +26,7 @@ Installation
 ------------
 
 ```bash
-composer require steevanb/composer-overload-class ^1.3
+composer require steevanb/composer-overload-class ^1.4
 ```
 
 Configuration
